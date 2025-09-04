@@ -50,17 +50,19 @@ class UserControler {
 
                 user.loadFromJSON(result);
 
-                user.save();
+                user.save().then(user=>{
 
-                this.getTr(user, tr);
+                    this.getTr(user, tr);
+    
+                    this.updateCount();
+    
+                    this.formUpdateEl.reset();
+    
+                    btn.disabled = false;
+    
+                    this.showPanelCreate();
 
-                this.updateCount();
-
-                this.formUpdateEl.reset();
-
-                btn.disabled = false;
-
-                this.showPanelCreate();
+                });
 
             }, (e)=>{
 
@@ -90,13 +92,15 @@ class UserControler {
 
             values.photo = content;
 
-            values.save();
+            values.save().then(user=>{
 
-            this.addLine(values);
+                this.addLine(user);
+    
+                this.formEl.reset();
+    
+                btn.disabled = false;
 
-            this.formEl.reset();
-
-            btn.disabled = false;
+            });
 
         }, (e)=>{
 
@@ -194,37 +198,20 @@ class UserControler {
 
 
     selectAll(){
-        //let users = User.getUsersStorage();
-        let ajax = new XMLHttpRequest();
 
-        ajax.open('GET', '/users');
+        User.getUsersStorage().then(data=>{
 
-        ajax.onload = evento =>{
+            data.users.forEach(dataUser=>{
 
-            let obj = { users: [] };
+                let user = new User();
 
-            try{
-                let obj = JSON.parse(ajax.responseText);
+                user.loadFromJSON(dataUser);
 
-            }catch{
-                console.error(e);
-                
-            }
+                this.addLine(user);
 
-
-            obj.users.forEach(dataUser=>{
-
-            let user = new User();
-
-            user.loadFromJSON(dataUser);
-
-            this.addLine(user);
+            });
 
         });
-
-        }
-        ajax.send();
-        
     };
 
     addLine(dataUser){
@@ -272,11 +259,14 @@ class UserControler {
 
                 user.loadFromJSON(JSON.parse(tr.dataset.user));
 
-                user.remove();
+                user.remove().then(data=>{
 
-                tr.remove();
-                
-                this.updateCount();
+                    tr.remove();
+                    
+                    this.updateCount();
+
+                });
+
             
             }
         });
